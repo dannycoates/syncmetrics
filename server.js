@@ -50,8 +50,9 @@ server.route([
     method: 'GET',
     path: '/data/stat.json',
     handler: function (req, reply) {
-      query('select count(1) from runway2', [], function (err, result) {
-        reply(err, result)
+      query('select cast(TRUNC(time) AS varchar) as date, count(1) as value from runway2 group by TRUNC(time) order by date', [], function (err, result) {
+        if (err) { return reply(err) }
+        reply(result.rows)
       })
     }
   },

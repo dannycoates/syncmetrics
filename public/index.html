@@ -2,8 +2,38 @@
 <html>
 <head>
   <title>Sync Metrics</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic' rel='stylesheet' type='text/css'>
+  <link href='https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css' rel='stylesheet' type='text/css'>
+  <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.8.0/metricsgraphics.min.css' rel='stylesheet' type='text/css'>
+
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.0/d3.min.js' charset='utf-8'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/metrics-graphics/2.8.0/metricsgraphics.min.js"></script>
 </head>
 <body>
   <h1>Hello World!</h1>
+  <div id="the_stat"></div>
+  <script>
+  d3.json(
+    'data/stat.json',
+    function (data) {
+      console.log(data)
+      data = MG.convert.date(data, 'date')
+      data = MG.convert.number(data, 'value')
+      MG.data_graphic({
+          title: "Requests per day",
+          description: "total number of sync requests per day",
+          data: data,
+          width: 600,
+          height: 300,
+          target: '#the_stat',
+          x_accessor: 'date',
+          y_accessor: 'value'
+      })
+    }
+  )
+  </script>
 </body>
 </html>
