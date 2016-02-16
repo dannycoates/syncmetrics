@@ -1,13 +1,16 @@
+var crypto = require('crypto')
 var path = require('path')
 var Hapi = require('hapi')
 var Inert = require('inert')
 var pg = require('pg')
+var SQSReceiver = require('./sqs')
 var config = require('./config.json')
 
 var dbUrl = 'postgres://' + config.user + ':' + config.password
   + '@' + config.host + '/' + config.db
 
 function query(stmt, params, cb) {
+  cb = cb || function() {}
   pg.connect(
     dbUrl,
     function (err, client, done) {
@@ -22,6 +25,29 @@ function query(stmt, params, cb) {
     }
   )
 }
+
+function hashTheBloodyId(id, key) {
+  var hmac = crypto.createHmac('sha256', key)
+  hmac.update(id)
+  return hmac.digest('hex').substr(-32)
+}
+
+var fxaQueue = new SQSReceiver(config.region, [config.queue])
+fxaQueue.on('data', function (message) {
+  switch (message.event) {
+    case 'verified':
+      query('insert into users values ($1, GETDATE())', [hashTheBloodyId(message.uid, config.key)])
+      break;
+    case 'delete':
+      var uid = message.uid.split('@')[0]
+      query('update users set deleted = GETDATE() where uid = $1', [hashTheBloodyId(uid, config.key)])
+      break;
+    default:
+      break;
+  }
+  message.del()
+})
+fxaQueue.start()
 
 var serverOptions = {
   connections: {

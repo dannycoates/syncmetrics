@@ -9,6 +9,7 @@
   "author": "",
   "license": "MPL-2.0",
   "dependencies": {
+    "aws-sdk": "2.2.35",
     "hapi": "9.3.1",
     "inert": "3.1.0",
     "pg": "4.4.6"
